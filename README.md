@@ -27,7 +27,8 @@ Shodan-PHP-REST-API is licensed under the GNU GPL v3 and is a project sponsored 
 * Our API implementation uses 3 different base URLs: Shodan API, Streaming API and Exploits API.
 * Tests folder provides some examples on how to write your own search query, use the CLI ```-r``` flag for running them all or call one with the ```-t``` flag.
 * If you're in search of better and more thorough documentation, please refer to Shodan's REST API documentation (https://developer.shodan.io/api).
-* For the functions that require subscriptions (banners(), geo() and ports()), refer to Shodan's STREAM API documentation (https://developer.shodan.io/api/stream).
+* For Shodan EXPLOITS API refer to the documentation (https://developer.shodan.io/api/exploits/rest).
+* For Shodan STREAM API refer to the documentation (https://developer.shodan.io/api/stream).
 
 ## Usage
 
