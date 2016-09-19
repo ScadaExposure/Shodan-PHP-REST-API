@@ -359,6 +359,51 @@ class Shodan {
 		return $responseDecoded;
 	}
 	
+	private function _request_stream($url, $post = FALSE, $options = FALSE) {
+		if (!$options) {
+			$options = array(
+				'http' => array(
+					'method' => 'GET',
+					'header' => 'Accept-language: en'."\n",
+					'timeout' => 10,
+					'ignore_errors' => TRUE,
+				)
+			);
+		}
+		
+		if ($post) {
+			$options['http']['header'] .= 'Content-type: application/x-www-form-urlencoded'."\n";
+			$options['http']['method'] = 'POST';
+			$options['http']['content'] = http_build_query($post);
+		}
+		
+		$context = stream_context_create($options);
+		
+		$response = fopen($url, 'r', false, $context);
+		fpassthru($response);
+		fclose($response);
+		
+		$responseDecoded = json_decode($response, RETURN_TYPE);
+		
+		$responseHeaders = $this->_parseHeaders($http_response_header);
+		
+		if (
+			$responseHeaders['reponse_code'] != 200 ||
+			isset($responseDecoded['error'])
+		) {
+			$error = $responseHeaders[0];
+			
+			if (isset($responseDecoded['error'])) {
+				$error = $responseDecoded['error'];
+			}
+			
+			throw new Exception('HTTP Error: '.$error);
+		}
+		
+		return $responseDecoded;
+	}
+	
+	
 	public function __call($method, $args) {
 		if (!isset($this->_api[$method])) {
 			throw new Exception('Unknown method: '.$method);
@@ -410,7 +455,12 @@ class Shodan {
 			}
 		}
 		
-		return $this->_request($url.$query, $post);
+		// Call the proper request method
+		if ($this->_api[$method]['rest'] == self::STREAM_API) {
+			return $this->_request_stream($url.$query, $post);
+		} else {
+			return $this->_request($url.$query, $post);
+		}
 	}
 	
 	public function getApis() {
