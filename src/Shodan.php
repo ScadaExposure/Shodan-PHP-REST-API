@@ -399,9 +399,9 @@ class Shodan {
 		
 		// Fix URL for duplicated methods
 		if ($method == 'ShodanScanId') {
-			$url = dirname($url) . preg_replace("/id/", "", basename($url));
+			$url = preg_replace('|/id|e', '', $url);
 		} else if ($method == 'ShodanPortsStream') {
-			$url = dirname($url) . preg_replace("/stream/", "", basename($url));
+			$url = preg_replace('|/stream|e', '', $url);
 		}
 		
 		$query = '?key='.$this->apiKey;
