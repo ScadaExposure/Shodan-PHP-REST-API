@@ -92,7 +92,6 @@ if (
 	$parameters = array();
 	foreach ($methods[$method] as $parameter => $parameterConf) {
 		if (
-			$parameter == 'method' ||
 			$parameter == 'rest'
 		) continue;
 		
