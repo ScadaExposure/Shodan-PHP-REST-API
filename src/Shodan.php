@@ -17,9 +17,6 @@ class Shodan {
 	const POSITION_QUERY = 'QUERY';
 	const POSITION_POST = 'POST';
 	
-	const METHOD_GET = 'GET';
-	const METHOD_POST = 'POST';
-	
 	const REST_API = 'API';
 	const REST_EXPLOIT = 'EXPLOIT';
 	const STREAM_API = 'STREAM_API';
@@ -29,7 +26,6 @@ class Shodan {
 	 */
 	private $_api = array(
 		'ShodanHost' => array(
-			'method' => self::METHOD_GET,
 			'rest' => self::REST_API,
 			
 			'ip' => array(
@@ -50,7 +46,6 @@ class Shodan {
 		),
 		
 		'ShodanHostCount' => array(
-			'method' => self::METHOD_GET,
 			'rest' => self::REST_API,
 			
 			'query' => array(
@@ -66,7 +61,6 @@ class Shodan {
 		),
 		
 		'ShodanHostSearch' => array(
-			'method' => self::METHOD_GET,
 			'rest' => self::REST_API,
 			
 			'query' => array(
@@ -82,7 +76,6 @@ class Shodan {
 		),
 		
 		'ShodanHostSearchTokens' => array(
-			'method' => self::METHOD_GET,
 			'rest' => self::REST_API,
 			
 			'query' => array(
@@ -93,17 +86,14 @@ class Shodan {
 		),
 		
 		'ShodanPorts' => array(
-			'method' => self::METHOD_GET,
 			'rest' => self::REST_API,
 		),
 		
 		'ShodanProtocols' => array(
-			'method' => self::METHOD_GET,
 			'rest' => self::REST_API,
 		),
 		
 		'ShodanScan' => array(
-			'method' => self::METHOD_POST,
 			'rest' => self::REST_API,
 			
 			'ips' => array(
@@ -114,7 +104,6 @@ class Shodan {
 		),
 		
 		'ShodanScanInternet' => array(
-			'method' => self::METHOD_POST,
 			'rest' => self::REST_API,
 			
 			'port' => array(
@@ -129,8 +118,7 @@ class Shodan {
 			),
 		),
 		
-		'ShodanScan' => array(
-			'method' => self::METHOD_GET,
+		'ShodanScanId' => array(
 			'rest' => self::REST_API,
 			
 			'id' => array(
@@ -141,12 +129,10 @@ class Shodan {
 		),
 		
 		'ShodanServices' => array(
-			'method' => self::METHOD_GET,
 			'rest' => self::REST_API,
 		),
 		
 		'ShodanQuery' => array(
-			'method' => self::METHOD_GET,
 			'rest' => self::REST_API,
 			
 			'page' => array(
@@ -167,7 +153,6 @@ class Shodan {
 		),
 		
 		'ShodanQuerySearch' => array(
-			'method' => self::METHOD_GET,
 			'rest' => self::REST_API,
 			
 			'query' => array(
@@ -183,7 +168,6 @@ class Shodan {
 		),
 		
 		'ShodanQueryTags' => array(
-			'method' => self::METHOD_GET,
 			'rest' => self::REST_API,
 			
 			'size' => array(
@@ -194,7 +178,6 @@ class Shodan {
 		),
 		
 		'LabsHoneyscore' => array(
-			'method' => self::METHOD_GET,
 			'rest' => self::REST_API,
 			
 			'ip' => array(
@@ -205,7 +188,6 @@ class Shodan {
 		),
 		
 		'Search' => array(
-			'method' => self::METHOD_GET,
 			'rest' => self::REST_EXPLOIT,
 			
 			'query' => array(
@@ -226,7 +208,6 @@ class Shodan {
 		),
 		
 		'Count' => array(
-			'method' => self::METHOD_GET,
 			'rest' => self::REST_EXPLOIT,
 			
 			'query' => array(
@@ -242,12 +223,10 @@ class Shodan {
 		),
 		
 		'ShodanBanners' => array(
-			'method' => self::METHOD_GET,
 			'rest' => self::STREAM_API,
 		),
 		
 		'ShodanAsn' => array(
-			'method' => self::METHOD_GET,
 			'rest' => self::STREAM_API,
 			
 			'asn' => array(
@@ -258,7 +237,6 @@ class Shodan {
 		),
 		
 		'ShodanCountries' => array(
-			'method' => self::METHOD_GET,
 			'rest' => self::STREAM_API,
 			
 			'countries' => array(
@@ -268,8 +246,7 @@ class Shodan {
 			),
 		),
 		
-		'ShodanPorts' => array(
-			'method' => self::METHOD_GET,
+		'ShodanPortsStream' => array(
 			'rest' => self::STREAM_API,
 			
 			'ports' => array(
@@ -420,6 +397,13 @@ class Shodan {
 			$url = $this->streamUrl.$preg;
 		}
 		
+		// Fix URL for duplicated methods
+		if ($method == 'ShodanScanId') {
+			$url = dirname($url) . preg_replace("/id/", "", basename($url));
+		} else if ($method == 'ShodanPortsStream') {
+			$url = dirname($url) . preg_replace("/stream/", "", basename($url));
+		}
+		
 		$query = '?key='.$this->apiKey;
 		$post = FALSE;
 		
@@ -427,9 +411,8 @@ class Shodan {
 			$args = $args[0];
 			
 			foreach ($this->_api[$method] as $parameter => $config) {
-				// Skip 'method' and 'rest'
+				// Skip 'rest'
 				if (
-					$parameter == 'method' ||
 					$parameter == 'rest'
 				) {
 					continue;
@@ -458,9 +441,10 @@ class Shodan {
 		// Call the proper request method
 		if ($this->_api[$method]['rest'] == self::STREAM_API) {
 			return $this->_request_stream($url.$query, $post);
-		} else {
-			return $this->_request($url.$query, $post);
 		}
+		
+		return $this->_request($url.$query, $post);
+		
 	}
 	
 	public function getApis() {

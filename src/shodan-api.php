@@ -21,7 +21,6 @@ function usage($client) {
 		
 		foreach ($methodConf as $parameter => $parameterConf) {
 			if (
-				$parameter == 'method' ||
 				$parameter == 'rest'
 			) continue;
 			
@@ -51,8 +50,6 @@ $options = getopt('rt:m:', array_merge(array(
 	'run-test:', // also known as "-t"
 	'method:' // also known as "-m"
 ), $methodOptions));
-
-// var_dump($options);
 
 // Run all the tests
 if (
