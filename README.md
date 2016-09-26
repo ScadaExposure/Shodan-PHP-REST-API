@@ -53,7 +53,7 @@ Following are the options:
 | -m | --method | ShodanProtocols |
 | -m | --method | ShodanScan --ips STRING |
 | -m | --method | ShodanScanInternet --port INTEGER --protocol STRING |
-| -m | --method | ShodanScan --id STRING |
+| -m | --method | ShodanScanId --id STRING |
 | -m | --method | ShodanServices |
 | -m | --method | ShodanQuery [--page INTEGER] [--sort STRING] [--order STRING] |
 | -m | --method | ShodanQuerySearch --query STRING [--page INTEGER] |
@@ -64,7 +64,7 @@ Following are the options:
 | -m | --method | ShodanBanners |
 | -m | --method | ShodanAsn --asn STRING |
 | -m | --method | ShodanCountries --countries STRING |
-| -m | --method | ShodanPorts --ports STRING |
+| -m | --method | ShodanPortsStream --ports STRING |
 
 ## Some CLI Run Examples
 
