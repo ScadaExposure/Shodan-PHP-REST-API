@@ -1,9 +1,14 @@
 <?php
 
+/**
+ * \class Shodan
+ * 
+ * This is the API class: costants, shodan methods and the generation of the HTTP requests are defined here. 
+ */
 class Shodan {
 	private $apiKey;
 	
-	/*
+	/**
 	 * Instantiating costants 
 	 */
 	const TYPE_BOOLEAN = 'BOOLEAN';
@@ -21,8 +26,9 @@ class Shodan {
 	const REST_EXPLOIT = 'EXPLOIT';
 	const STREAM_API = 'STREAM_API';
 	
-	/*
+	/**
 	 * Shodan methods
+	 * @var array $_api;
 	 */
 	private $_api = array(
 		'ShodanHost' => array(
@@ -118,7 +124,7 @@ class Shodan {
 			),
 		),
 		
-		'ShodanScanId' => array(
+		'ShodanScan_Id' => array(
 			'rest' => self::REST_API,
 			
 			'id' => array(
@@ -246,7 +252,7 @@ class Shodan {
 			),
 		),
 		
-		'ShodanPortsStream' => array(
+		'ShodanPorts_Stream' => array(
 			'rest' => self::STREAM_API,
 			
 			'ports' => array(
@@ -261,6 +267,7 @@ class Shodan {
 	 * Construct.
 	 * 
 	 * @param string $apiKey;
+	 * @param bool $returnType;
 	 * @return void;
 	 */
 	public function __construct($apiKey, $returnType = FALSE) {
@@ -273,6 +280,12 @@ class Shodan {
 		define('RETURN_TYPE', $returnType);
 	}
 	
+	/**
+	 * Parse Headers.
+	 * 
+	 * @param string $headers;
+	 * @return string $head;
+	 */
 	private function _parseHeaders($headers) {
 		$head = array();
 		
@@ -283,7 +296,7 @@ class Shodan {
 				$head[trim($t[0])] = trim($t[1]);
 			} else {
 				$head[] = $v;
-				if (preg_match( '|HTTP/[0-9\.]+\s+([0-9]+)|', $v, $out)) {
+				if (preg_match('|HTTP/[0-9\.]+\s+([0-9]+)|', $v, $out)) {
 					$head['reponse_code'] = intval($out[1]);
 				}
 			}
@@ -292,7 +305,14 @@ class Shodan {
 		return $head;
 	}
 	
-	private function _request($url, $post = FALSE, $options = FALSE) {
+	/**
+	 * Request Context.
+	 * 
+	 * @param bool $post;
+	 * @param bool $options;
+	 * @return object $options;
+	 */
+	private function _requestContext($post = FALSE, $options = FALSE) {
 		if (!$options) {
 			$options = array(
 				'http' => array(
@@ -310,100 +330,148 @@ class Shodan {
 			$options['http']['content'] = http_build_query($post);
 		}
 		
+		return stream_context_create($options);
+	}
+	
+	/**
+	 * Response Success HTTP.
+	 * 
+	 * @param string $headers;
+	 * @return TRUE;
+	 */
+	private function _responseSuccessHTTP($headers) {
+		$responseHeaders = $this->_parseHeaders($headers);
+		
+		if ($responseHeaders['reponse_code'] != 200) {
+			return $responseHeaders[0];
+		}
+		
+		return TRUE;
+	}
+	
+	/**
+	 * Response Success API.
+	 * 
+	 * @param string $responseDecoded;
+	 * @return TRUE;
+	 */
+	private function _responseSuccessAPI($responseDecoded) {
+		if (isset($responseDecoded['error'])) {
+			return $responseDecoded['error'];
+		}
+		
+		return TRUE;
+	}
+	
+	/**
+	 * Response Success.
+	 * 
+	 * @param string $headers;
+	 * @param string $response;
+	 * @return string $responseDecoded;
+	 */
+	private function _responseSuccess($headers, $response) {
+		// Check for HTTP errors
+		if (($errorHTTP = $this->_responseSuccessHTTP($headers)) !== TRUE) {
+			// Decode
+			$responseDecoded = $this->_responseDecode($response);
+			
+			// Check for API errors
+			if (($errorAPI = $this->_responseSuccessAPI($responseDecoded)) !== TRUE) {
+				throw new Exception('API Error: '.$errorAPI);
+			}
+			
+			// If we were unable to identify the error in the response body, then
+			// just raise the HTTP error
+			throw new Exception('HTTP Error: '.$errorHTTP);
+		}
+		
+		// Decode
+		$responseDecoded = $this->_responseDecode($response);
+		return $responseDecoded;
+	}
+	
+	/**
+	 * Response Decode.
+	 * 
+	 * @param string $response;
+	 * @return object/array $response;
+	 */
+	private function _responseDecode($response) {
+		return json_decode($response, RETURN_TYPE);
+	}
+	
+	/**
+	 * Request.
+	 * 
+	 * @param string $url;
+	 * @param bool $post;
+	 * @param bool $options;
+	 * @return object/array $http_response_header $response;
+	 */
+	private function _request($url, $post = FALSE, $options = FALSE) {
 		$response = @file_get_contents(
 			$url,
 			FALSE,
-			stream_context_create($options)
+			$this->_requestContext($post, $options)
 		);
 		
-		$responseDecoded = json_decode($response, RETURN_TYPE);
-		
-		$responseHeaders = $this->_parseHeaders($http_response_header);
-		
-		if (
-			$responseHeaders['reponse_code'] != 200 ||
-			isset($responseDecoded['error'])
-		) {
-			$error = $responseHeaders[0];
-			
-			if (isset($responseDecoded['error'])) {
-				$error = $responseDecoded['error'];
-			}
-			
-			throw new Exception('HTTP Error: '.$error);
-		}
-		
-		return $responseDecoded;
+		return $this->_responseSuccess($http_response_header, $response);
 	}
 	
-	private function _request_stream($url, $post = FALSE, $options = FALSE) {
-		if (!$options) {
-			$options = array(
-				'http' => array(
-					'method' => 'GET',
-					'header' => 'Accept-language: en'."\n",
-					'timeout' => 10,
-					'ignore_errors' => TRUE,
-				)
-			);
-		}
+	/**
+	 * Request Stream.
+	 * 
+	 * @param string $url;
+	 * @param bool $post;
+	 * @param bool $options;
+	 * @return void;
+	 */
+	private function _requestStream($url, $post = FALSE, $options = FALSE) {
+		$handle = fopen(
+			$url, 
+			'r', 
+			FALSE, 
+			$this->_requestContext($post, $options)
+		);
 		
-		if ($post) {
-			$options['http']['header'] .= 'Content-type: application/x-www-form-urlencoded'."\n";
-			$options['http']['method'] = 'POST';
-			$options['http']['content'] = http_build_query($post);
-		}
+		$firstLine = fgets($handle);
+		$this->_responseSuccess($http_response_header, $firstLine);
 		
-		$context = stream_context_create($options);
-		
-		$response = fopen($url, 'r', false, $context);
-		fpassthru($response);
-		fclose($response);
-		
-		$responseDecoded = json_decode($response, RETURN_TYPE);
-		
-		$responseHeaders = $this->_parseHeaders($http_response_header);
-		
-		if (
-			$responseHeaders['reponse_code'] != 200 ||
-			isset($responseDecoded['error'])
-		) {
-			$error = $responseHeaders[0];
-			
-			if (isset($responseDecoded['error'])) {
-				$error = $responseDecoded['error'];
-			}
-			
-			throw new Exception('HTTP Error: '.$error);
-		}
-		
-		return $responseDecoded;
+		// No errors detected, stream the output
+		echo $firstLine;
+		fpassthru($handle);
+		fclose($handle);
 	}
 	
-	
+	/**
+	 * Call function.
+	 * 
+	 * @param string $method;
+	 * @param string $args;
+	 * @return object/array $url.$query $post;
+	 */
 	public function __call($method, $args) {
 		if (!isset($this->_api[$method])) {
 			throw new Exception('Unknown method: '.$method);
 		}
 		
-		/* Generate the URL for the call */
-		$preg = preg_replace('|([A-Z])|e', '"/".strtolower("$0")', $method);
+		// Handle overlapping methods (see: http://to-do)
+		$url = preg_replace('|\_.*$|', '', $method);
 		
+		// Generate the URL for the call
+		$url = preg_replace('|([A-Z])|e', '"/".strtolower("$0")', $url);
+		
+		// Detect API backend
 		if ($this->_api[$method]['rest'] == self::REST_API) {
-			$url = $this->apiUrl.$preg;
+			$url = $this->apiUrl.$url;
 		} elseif ($this->_api[$method]['rest'] == self::REST_EXPLOIT) {
-			$url = $this->exploitUrl.$preg;
+			$url = $this->exploitUrl.$url;
 		} else {
-			$url = $this->streamUrl.$preg;
+			$url = $this->streamUrl.$url;
 		}
 		
-		// Fix URL for duplicated methods
-		if ($method == 'ShodanScanId') {
-			$url = preg_replace('|/id|e', '', $url);
-		} else if ($method == 'ShodanPortsStream') {
-			$url = preg_replace('|/stream|e', '', $url);
-		}
-		
+		// Compose query string
 		$query = '?key='.$this->apiKey;
 		$post = FALSE;
 		
@@ -440,13 +508,17 @@ class Shodan {
 		
 		// Call the proper request method
 		if ($this->_api[$method]['rest'] == self::STREAM_API) {
-			return $this->_request_stream($url.$query, $post);
+			return $this->_requestStream($url.$query, $post);
 		}
 		
 		return $this->_request($url.$query, $post);
-		
 	}
 	
+	/**
+	 * Get Apis.
+	 * 
+	 * @return $_api;
+	 */
 	public function getApis() {
 		return $this->_api;
 	}

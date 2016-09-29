@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * \class Colors
+ * 
+ * This class set the shell colors.
+ */
 class Colors {
 	// Shell colors
 	private $foregroundColors = array(
@@ -32,7 +37,14 @@ class Colors {
 		'light_gray' => '47'
 	);
 	
-	// Returns colored string
+	/**
+	 * Get colored string.
+	 * 
+	 * @param string $string;
+	 * @param bool $foregroundColor;
+	 * @param bool $backgroundColor;
+	 * @return string $buffer.$string."\033[0m"."\n";
+	 */
 	public function getColoredString($string, $foregroundColor = FALSE, $backgroundColor = FALSE) {
 		$buffer = '';
 		

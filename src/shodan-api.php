@@ -10,6 +10,13 @@ $colors = new Colors();
 
 // CLI
 
+/**
+ * Usage.
+ * Auto-generate the usage for CLI
+ * 
+ * @param string $client;
+ * @return void;
+ */
 function usage($client) {
 	echo 'Usage:'."\n";
 	
@@ -71,7 +78,7 @@ if (
 	
 	if (!$test) usage($client);
 	
-	if (!in_array('tests/'.$test.'.php', glob('tests/*.php'))) usage();
+	if (!in_array('tests/'.$test.'.php', glob('tests/*.php'))) usage($client);
 	
 	require_once 'tests/'.$test.'.php';
 	
@@ -87,7 +94,7 @@ if (
 	if (!$method) usage($client);
 	
 	$methods = $client->getApis();
-	if (!array_key_exists($method, $methods)) usage();
+	if (!array_key_exists($method, $methods)) usage($client);
 	
 	$parameters = array();
 	foreach ($methods[$method] as $parameter => $parameterConf) {
