@@ -2,6 +2,7 @@
 
 /**
  * \class Shodan
+ * \brief Shodan class
  * 
  * This is the API class: costants, shodan methods and the generation of the HTTP requests are defined here. 
  */
@@ -27,7 +28,7 @@ class Shodan {
 	const STREAM_API = 'STREAM_API';
 	
 	/**
-	 * Shodan methods
+	 * Shodan methods.
 	 * @var array $_api;
 	 */
 	private $_api = array(
@@ -265,6 +266,7 @@ class Shodan {
 	
 	/**
 	 * Construct.
+	 * \fn __construct($apiKey, $returnType = FALSE)
 	 * 
 	 * @param string $apiKey;
 	 * @param bool $returnType;
@@ -282,6 +284,7 @@ class Shodan {
 	
 	/**
 	 * Parse Headers.
+	 * \fn _parseHeaders($headers)
 	 * 
 	 * @param string $headers;
 	 * @return string $head;
@@ -307,6 +310,7 @@ class Shodan {
 	
 	/**
 	 * Request Context.
+	 * \fn _requestContext($post = FALSE, $options = FALSE)
 	 * 
 	 * @param bool $post;
 	 * @param bool $options;
@@ -335,6 +339,7 @@ class Shodan {
 	
 	/**
 	 * Response Success HTTP.
+	 * \fn _responseSuccessHTTP($headers)
 	 * 
 	 * @param string $headers;
 	 * @return TRUE;
@@ -351,6 +356,7 @@ class Shodan {
 	
 	/**
 	 * Response Success API.
+	 * \fn _responseSuccessAPI($responseDecoded)
 	 * 
 	 * @param string $responseDecoded;
 	 * @return TRUE;
@@ -365,6 +371,7 @@ class Shodan {
 	
 	/**
 	 * Response Success.
+	 * \fn _responseSuccess($headers, $response)
 	 * 
 	 * @param string $headers;
 	 * @param string $response;
@@ -393,9 +400,10 @@ class Shodan {
 	
 	/**
 	 * Response Decode.
+	 * \fn _responseDecode($response)
 	 * 
 	 * @param string $response;
-	 * @return object/array $response;
+	 * @return array $response;
 	 */
 	private function _responseDecode($response) {
 		return json_decode($response, RETURN_TYPE);
@@ -403,11 +411,12 @@ class Shodan {
 	
 	/**
 	 * Request.
+	 * \fn _request($url, $post = FALSE, $options = FALSE)
 	 * 
 	 * @param string $url;
 	 * @param bool $post;
 	 * @param bool $options;
-	 * @return object/array $http_response_header $response;
+	 * @return array $http_response_header, $response;
 	 */
 	private function _request($url, $post = FALSE, $options = FALSE) {
 		$response = @file_get_contents(
@@ -421,6 +430,7 @@ class Shodan {
 	
 	/**
 	 * Request Stream.
+	 * \fn _requestStream($url, $post = FALSE, $options = FALSE)
 	 * 
 	 * @param string $url;
 	 * @param bool $post;
@@ -446,17 +456,18 @@ class Shodan {
 	
 	/**
 	 * Call function.
+	 * \fn __call($method, $args)
 	 * 
 	 * @param string $method;
 	 * @param string $args;
-	 * @return object/array $url.$query $post;
+	 * @return array $url.$query, $post;
 	 */
 	public function __call($method, $args) {
 		if (!isset($this->_api[$method])) {
 			throw new Exception('Unknown method: '.$method);
 		}
 		
-		// Handle overlapping methods (see: http://to-do)
+		// Handle overlapping methods (see: https://github.com/ScadaExposure/Shodan-PHP-REST-API#handle-overlapping-methods)
 		$url = preg_replace('|\_.*$|', '', $method);
 		
 		// Generate the URL for the call
@@ -516,6 +527,7 @@ class Shodan {
 	
 	/**
 	 * Get Apis.
+	 * \fn getApis()
 	 * 
 	 * @return $_api;
 	 */

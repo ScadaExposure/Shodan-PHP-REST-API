@@ -53,7 +53,7 @@ Following are the options:
 | -m | --method | ShodanProtocols |
 | -m | --method | ShodanScan --ips STRING |
 | -m | --method | ShodanScanInternet --port INTEGER --protocol STRING |
-| -m | --method | ShodanScanId --id STRING |
+| -m | --method | ShodanScan_Id --id STRING |
 | -m | --method | ShodanServices |
 | -m | --method | ShodanQuery [--page INTEGER] [--sort STRING] [--order STRING] |
 | -m | --method | ShodanQuerySearch --query STRING [--page INTEGER] |
@@ -64,7 +64,7 @@ Following are the options:
 | -m | --method | ShodanBanners |
 | -m | --method | ShodanAsn --asn STRING |
 | -m | --method | ShodanCountries --countries STRING |
-| -m | --method | ShodanPortsStream --ports STRING |
+| -m | --method | ShodanPorts_Stream --ports STRING |
 
 ## Some CLI Run Examples
 
@@ -79,6 +79,18 @@ Following are the options:
 
 ### Shodan Scan request status:
 ![Shodan-scan-id](https://raw.githubusercontent.com/alexsalvetti/shodan-php-api.github.io/master/shodan-scan-id.gif)
+
+## Handle overlapping methods
+
+Using PHP magic methods we call the method by its name and use it for generate the URL for the request.
+For doing that we use ```preg_replace``` inserting a ```/``` when an uppercase character is found and appending that character in lowercase.
+
+But we found that two methods in Shodan API were overlapping with other two methods, that are: **"ShodanScan"** and **"ShodanPorts"**.
+So we renamed **"ShodanScan"** given with "id" parameter in **"ShodanScan_Id"**, and **"ShodanPorts"** for the stream API in **"ShodanPorts_Stream"**.
+
+But the URL must not have those renaming, so we eliminate the ```_``` and all it comes next of it for getting the job done.
+
+You can find it at: https://github.com/ScadaExposure/Shodan-PHP-REST-API/blob/master/src/Shodan.php#L471
 
 ## Tests class - REST API
 
@@ -146,7 +158,7 @@ var_dump($client->ShodanScanInternet(array(
 ### Shodan Scan Id (```/tests/crawl.php```): 
 Check the progress of a previously submitted scan request.
 ```php
-var_dump($client->ShodanScanId(array(
+var_dump($client->ShodanScan_Id(array(
 	'id' => 'R2XRT5HH6X67PFAB',
 )));
 ```

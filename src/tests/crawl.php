@@ -30,7 +30,7 @@ try {
  */
 echo $colors->getColoredString('STATUS OF REQUESTED SCAN:', 'black', 'green');
 try {
-	var_dump($client->ShodanScan(array(
+	var_dump($client->ShodanScan_Id(array(
 		'id' => '4I1LK2YHAY3PLWJ6',
 	)));
 } catch (Exception $e) {

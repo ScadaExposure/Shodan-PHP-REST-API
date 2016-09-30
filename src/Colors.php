@@ -2,8 +2,9 @@
 
 /**
  * \class Colors
+ * \brief Colors class
  * 
- * This class set the shell colors.
+ * This class define shell colors.
  */
 class Colors {
 	// Shell colors
@@ -43,7 +44,7 @@ class Colors {
 	 * @param string $string;
 	 * @param bool $foregroundColor;
 	 * @param bool $backgroundColor;
-	 * @return string $buffer.$string."\033[0m"."\n";
+	 * @return string $buffer.$string;
 	 */
 	public function getColoredString($string, $foregroundColor = FALSE, $backgroundColor = FALSE) {
 		$buffer = '';

@@ -12,7 +12,7 @@ $colors = new Colors();
 
 /**
  * Usage.
- * Auto-generate the usage for CLI
+ * Auto-generate the usage for CLI.
  * 
  * @param string $client;
  * @return void;
