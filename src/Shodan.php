@@ -468,11 +468,23 @@ class Shodan {
 		}
 		
 		// Handle overlapping methods (see: https://github.com/ScadaExposure/Shodan-PHP-REST-API#handle-overlapping-methods)
-		$url = preg_replace('|\_.*$|', '', $method);
+		$url = preg_replace_callback(
+			'|\_.*$|',
+			function ($matches) {
+    				return "";
+			},
+			$method
+		);
 		
 		// Generate the URL for the call
-		$url = preg_replace('|([A-Z])|e', '"/".strtolower("$0")', $url);
-		
+		$url = preg_replace_callback(
+			'|([A-Z])|',
+			function ($matches) {
+    				return "/".strtolower($matches[0]);
+			},
+			$url
+		);		
+
 		// Detect API backend
 		if ($this->_api[$method]['rest'] == self::REST_API) {
 			$url = $this->apiUrl.$url;
@@ -516,7 +528,6 @@ class Shodan {
 				}
 			}
 		}
-		
 		// Call the proper request method
 		if ($this->_api[$method]['rest'] == self::STREAM_API) {
 			return $this->_requestStream($url.$query, $post);
