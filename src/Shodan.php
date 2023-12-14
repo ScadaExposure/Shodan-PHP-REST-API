@@ -262,6 +262,27 @@ class Shodan {
 				'position' => self::POSITION_GET,
 			),
 		),
+
+        'AccountProfile' => [
+            'rest' => self::REST_API,
+        ],
+
+        'DnsReverse' => [
+            'rest' => self::REST_API,
+            'ip' => array(
+                'type' => self::TYPE_STRING,
+                'optional' => self::PARAMETER_MANDATORY,
+            )
+
+        ],
+
+        'DnsResolve' => [
+            'rest' => self::REST_API,
+            'hostnames' => array(
+                'type' => self::TYPE_STRING,
+                'optional' => self::PARAMETER_MANDATORY,
+            )
+        ],
 	);
 	
 	/**
