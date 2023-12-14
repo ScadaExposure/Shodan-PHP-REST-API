@@ -269,7 +269,7 @@ class Shodan {
 
         'DnsReverse' => [
             'rest' => self::REST_API,
-            'ip' => array(
+            'ips' => array(
                 'type' => self::TYPE_STRING,
                 'optional' => self::PARAMETER_MANDATORY,
             )
