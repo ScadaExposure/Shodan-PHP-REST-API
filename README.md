@@ -220,3 +220,48 @@ var_dump($client->Count(array(
 	'query' => 'cve',
 )));
 ```
+
+### Account Informations  
+This method allows you to get your Shodan's account information results.
+```php
+var_dump($client->AccountProfile());
+
+{
+    "member": true,
+    "credits": 0,
+    "display_name": null,
+    "created": "2020-06-15T10:44:43.148000"
+}
+```
+
+
+### DNS Resolve
+Look up the IP address for the provided list of hostnames, takes a comma-separated list of hostnames.
+```php
+var_dump($client->DnsResolve(array(
+	'hostnames' => 'google.com,bing.com', 
+)));
+
+{
+    "google.com": "172.217.6.46",
+    "facebook.com": "157.240.22.35"
+}
+```
+
+### DNS Reverse
+Look up the hostnames that have been defined for the given list of comma-separated IP addresses.
+
+```php
+var_dump($client->DnsReverse(array(
+	'ips' => '8.8.8.8,1.1.1.1', 
+)));
+
+{
+    "8.8.8.8": [
+        "dns.google"
+    ],
+    "1.1.1.1": [
+        "one.one.one.one"
+    ]
+}
+```
